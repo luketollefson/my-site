@@ -1,0 +1,11 @@
+resolver: lts-19.16
+packages:
+  - .
+extra-deps:
+  - hakyll-4.15.1.1  # Or a later version you installed
+
+
+nix:
+  enable: true
+  path: [nixpkgs=channel:nixos-22.05]
+  packages: [zlib.dev, zlib.out]
