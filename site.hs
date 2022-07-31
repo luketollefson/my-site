@@ -3,13 +3,25 @@
 import           Data.Monoid (mappend)
 import           Hakyll
 
+import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
+import Text.Pandoc.Options      (ReaderOptions (..), WriterOptions (..))
 
 --------------------------------------------------------------------------------
+pandocCodeStyle :: Style
+pandocCodeStyle = haddock
+
+pandocCompiler' :: Compiler (Item String)
+pandocCompiler' =
+  pandocCompilerWith
+    defaultHakyllReaderOptions
+    defaultHakyllWriterOptions
+      { writerHighlightStyle   = Just pandocCodeStyle
+      }
+
 config :: Configuration
 config = defaultConfiguration
   { destinationDirectory = "docs"
   }
-
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -21,16 +33,21 @@ main = hakyllWith config $ do
     match "css/*" $ do
         route   idRoute
         compile compressCssCompiler
+    
+    create ["css/syntax.css"] $ do
+        route idRoute
+        compile $ do
+            makeItem $ styleToCss pandocCodeStyle
 
     match (fromList ["about.rst", "contact.markdown"]) $ do
         route   $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ pandocCompiler'
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls
 
     match "posts/*" $ do
         route $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ pandocCompiler'
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
@@ -65,6 +82,16 @@ main = hakyllWith config $ do
 
     match "templates/*" $ compile templateBodyCompiler
 
+    match ("CNAME"
+       .||. "favicon.ico"
+       .||. "robots.txt"
+    --    .||. "_config.yml"
+    --    .||. "images/*"
+    --    .||. "fonts/*"
+    --    .||. ".well-known/*"
+       ) $ do
+        route   idRoute
+        compile copyFileCompiler
 
 --------------------------------------------------------------------------------
 postCtx :: Context String
