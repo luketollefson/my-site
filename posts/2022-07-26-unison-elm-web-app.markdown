@@ -1,10 +1,10 @@
 ---
-title: Create a Simple Web App with Unison and Elm
+title: Create a Simple Web App With Unison and Elm
 ---
 
 # Introduction
 
-Lets create a simple web app that lets a user increment and decrement an number. We will use Unison to create a backend service and use Elm to create a frontend service.
+Let's create a simple web app that lets a user increment and decrement a number. We will use Unison to create a backend service and use Elm to create a frontend service.
 
 <p align="center" width="100%">
   <img width="66%" src="../images/unison-elm-demo.png" />
@@ -14,39 +14,39 @@ Lets create a simple web app that lets a user increment and decrement an number.
 
 
 
-## What is Unison?
+## What Is Unison?
 
-Unison, as the website puts it, is a language "from the future". It departs from the conventional file based programming and instead stores all the code into a single hash table. This allows you to reference any code ever written by the hash of the code. 
+Unison, as the website puts it, is a language "from the future". It departs from the conventional file-based programming and instead stores all the code into a single hash table. This allows you to reference any code ever written by the hash of the code. 
 
-This novel code storage paradigm simplifies a great deal of hard problems in computer science, including distributed computing, durable stoarge, dependency managamgnet, refactoring, and more the longer you think on it. More information, and just how these problems are simplified can be found on the [Unison website](https://www.unison-lang.org/) and its [big ideas page](https://www.unison-lang.org/learn/the-big-idea/).
+This novel code storage paradigm simplifies many hard problems in computer science, including distributed computing, durable storage, dependency management, refactoring, and more the longer you think about it. More information, and just how these problems are simplified can be found on the [Unison website](https://www.unison-lang.org/) and its [big ideas page](https://www.unison-lang.org/learn/the-big-idea/).
 
 We will use Unison as our backend language
 
-## What is Elm?
+## What Is Elm?
 
-Elm is a better known functionall programming language used for frontend development It has a Haskell like look. You can find more information on its [offcial website](https://elm-lang.org/).
+Elm is a better-known functional programming language used for frontend development. It has a Haskell-like look. You can find more information on its [official website](https://elm-lang.org/).
 
 We will Elm as our frontend language.
 
 ## Why Unison and Elm?
 
-Both Unison and Elm have a ML look and neither Haskell-like typeclasses. I can't find an explaination of why Elm doesn't have typeclasses ([only this](https://github.com/elm/compiler/issues/396)). Between [this post](https://www.unisonweb.org/2019/04/04/writeup-of-our-first-unison-meetup/#other-questions) and [this post](http://pchiusano.github.io/2018-02-13/typeclasses.html) the Unison developers explain how typeclasses create a global cohereance. Requiring global cohereance for Unison would be compromising the flexility it's code storage model. Edward Kmett has a [good presentation of this global coherance problem on YouTube](https://youtu.be/hIZxTQP1ifo). And Gabriella Gonzalez wrote the infamous ["Scrap your type classes"](https://www.haskellforall.com/2012/05/scrap-your-type-classes.html) bashing Haskell type classes for a variety of reasons. 
+Both Unison and Elm have an ML look and neither have Haskell-like typeclasses. I can't find an explanation of why Elm doesn't have typeclasses ([only this](https://github.com/elm/compiler/issues/396)). Between [this post](https://www.unisonweb.org/2019/04/04/writeup-of-our-first-unison-meetup/#other-questions) and [this post](http://pchiusano.github.io/2018-02-13/typeclasses.html), the Unison developers explain how typeclasses require global coherence. Requiring global coherence for Unison would be compromising the flexibility of its code storage model. Edward Kmett has a [good presentation of this global coherence problem on YouTube](https://youtu.be/hIZxTQP1ifo). And Gabriella Gonzalez wrote the infamous ["Scrap your type classes"](https://www.haskellforall.com/2012/05/scrap-your-type-classes.html) bashing Haskell typeclasses for a variety of reasons. 
 
-In my experience, typeclasses are easier then the alternative of having `List.map`, `Map.map`, `Tree.map`, etc. Admittedly, most of my FP experience is limited to Haskell, but I at least want to be able to choose which level of abstraction I'm working on, and not be prescribed to only work on concrete data types. And I like how typeclasses let me do this. But Unison's choice to not have them makes a ton of sense.
+In my experience, typeclasses are easier than the alternative of having `List.map`, `Map.map`, `Tree.map`, etc. Admittedly, most of my FP experience is limited to Haskell, but I at least want to be able to choose which level of abstraction I'm working on, and not be prescribed to only work on concrete data types. And I like how typeclasses let me do this. But Unison's choice to not have them makes a ton of sense.
 
-Maybe my narrow focus on Haskell has kept my mind shut from other idea, but I believe marrying Haskell typeclasses with Unison code base would make the worlds best programming language. But, to my knowledge, no one has cracked this problem.  If someone can point me to the latest (and foundational) research on typeclasses and this global coherence issue, that would be appricited. Now, Let us go on a write our Unison backend.
+Maybe we could have both Haskell-like typeclasses and an Unison code storage model without this global coherence issue? I don't know what this would look like, it might not be possible, but it is interesting to think about.
 
 # Create Our Unison Backend
 
-Our backend will know three routes: the `"/"` route will request the counter's state; the `"/increment"` route will increment the couter's state by one; and the `"/decrement"` route will decrement the coutner's state by one. The backend will also save the counter to a _counter.ubin_ file after every request.
+Our backend will know three routes: the `"/"` route will request the counter's state; the `"/increment"` route will increment the counter's state by one; the `"/decrement"` route will decrement the counter's state by one. The backend will also save the counter to a _counter.ubin_ file after every request.
 
 First, let us install the necessary dependencies to start writing our backend.
 
-## Installing `http`, `logging`, and `file` Libraries in Unison Codebase Manager (UCM)
+## Installing `http`, `logging`, and `file` Libraries With the Unison Codebase Manager (UCM)
 
 
 
-To create the server we will need [the Unison `http` library](https://share.unison-lang.org/users/unison/code/latest/namespaces/public/http). However, the library isn't set up for us to use custom abilities in the request handler, so instead we need this branch I made (this could change tomorrow! Unison's `http` library is still in the works!). To download my branch of the `http` library run the following in `ucm`
+To create the server we will need [the Unison `http` library](https://share.unison-lang.org/users/unison/code/latest/namespaces/public/http). However, the library isn't set up for us to use custom abilities in the request handler, so instead, we need a branch I made (the official library might support this in the future). To download my branch of the `http` library run the following in `ucm`
 
 ```
 .> pull luketollefson.public.prs._genericRequestHandler lib._genericRequestHandler
@@ -81,11 +81,11 @@ serveWeb _ =
         with Log.default "Example Web App")
 ```
 
-In `serveWeb` we define our server's "`main`" function. This function will be ran with `run serveWeb` in UCM. At comment #1 we initalize the counter for our runtime. When _counter.ubin_ exists we set `initialState` to the value within it, otherwise our `initialState` will be `0`. At comment #2 we wrap our request handler `handleRequest` in code that saves our counter into durable storage after every request. In comment #3 we actually run the server function `run`.
+In `serveWeb` we define our server's "`main`" function. This function will be run with `run serveWeb` in UCM. At comment #1 we initialize the counter for our runtime. When _counter.ubin_ exists we set `initialState` to the value within it, otherwise, our `initialState` will be `0`. At comment #2 we wrap our request handler `handleRequest` in code that saves our counter into durable storage after every request. In comment #3 we run the server function `run`.
 
 ## The Request Handler `handleRequest`
 
-Broadly, a backend service will take in a request and emit back a response to a client. So we can think of our service as function from a request to a response, written as a type this is `SimpleHttpRequest ->{g} SimpleHttpResponse` where `{g}` allows us to tag any ability in the function. In our case, `handleRequest` is our handler and it looks like this:
+Broadly, a backend service will take in a request and emit back a response to a client. So we can think of our service as a function from a request to a response, written as a type this is `SimpleHttpRequest ->{g} SimpleHttpResponse` where `{g}` allows us to tag any ability in the function. In our case, `handleRequest` is our handler and it looks like this:
 
 ```haskell
 handleRequest : SimpleHttpRequest ->{Store Nat} SimpleHttpResponse
@@ -108,20 +108,20 @@ cors : [Header]
 cors = [Header "Access-Control-Allow-Origin" "*"]
 ```
 
-In `handleRequest` we first destruct the request URI's path into `p`. Then we pattern match for  `"/"`, `"/increment"`, `"/decrement"` or `_`. If we match `"/"` we will return the counter. If `"/increment"` or `"/decrement"` are matched we will increment or decrement the counter respectivly and return an empty response. All other `p` match the `_` case and return a error response. 
+In `handleRequest` we first destruct the request URI's path into `p`. Then we pattern match for  `"/"`, `"/increment"`, `"/decrement"` or `_`. If we match `"/"` we will return the counter. If `"/increment"` or `"/decrement"` are matched we will increment or decrement the counter respectively and return an empty response. All other `p` match the `_` case and return an error response. 
 
-Additionally, we define `cors` which fixes a CORS error. Setting `Access-Control-Allow-Origin=*` is bad practice, but for us it is simple enough for us.
+Additionally, we define `cors` which fixes a CORS error. Setting `Access-Control-Allow-Origin=*` is bad practice, but it is simple enough for us.
 
 ## Durable Storage
 
-In the `saveAfter` definition of the `serveWeb` function we use the `saveStore` function. The `saveStore` function will save whatever in the store ability to durable storage, it is defined as
+In the `saveAfter` definition of the `serveWeb` function, we use the `saveStore` function. The `saveStore` function will save whatever in the store ability to durable storage, it is defined as
 
 ```haskell
 saveStore : FilePath ->{IO, Exception, Store a} ()
 saveStore path = writeDurable path (Store.get)
 ```
 
-One of the attractive parts of Unison is how easy durable storage should be. In theory, we should always be able to sensibly read data we have written since we have a full repository of all the data types that have been created. Maybe Unison will slay the SQL zombie? Though admittedly, it is hard to find documentation for it—I found the following works alright
+One of the attractive parts of Unison is how easy durable storage should be. In theory, we should always be able to sensibly read data we have written since we have a full repository of all the data types that have been created. Though admittedly, it is hard to find documentation for it—I found the following works alright
 
 ```haskell
 readDurable : FilePath ->{IO, Exception} a
@@ -135,11 +135,11 @@ writeDurable path v =
   file.bytes.writeFile path (Value.serialize (Value.value v))
 ```
 
-The function `readDurable` will give back and `a` from a particular `FilePath`. The helpers `throwLoad` and `throwDeserialized` basically serve to get `Value.load`, `Value.deserialize`, and `file.bytes.readFile` to compose nicely. 
+The function `readDurable` will give back and `a` from a particular `FilePath`. The helpers `throwLoad` and `throwDeserialized` serve to get `Value.load`, `Value.deserialize`, and `file.bytes.readFile` to compose nicely. 
 
 The function `writeDurable` will write `a` to a particular `FilePath`. 
 
-## Playing with the Unison Backend without a Frontend
+## Playing With the Unison Backend Without a Frontend
 
 In `ucm` run `run serveWeb` and browse to [localhost:5556](localhost:5556). You'll see the number zero, and if you go to [localhost:5556/increment](localhost:5556/increment) or [localhost:5556/decrement](localhost:5556/decrement) the counter will be incremented or decremented the next time you go to [localhost:5556](localhost:5556).
 
@@ -147,18 +147,18 @@ You can restart the backend and the old counter will be loaded from _counter.ubi
 
 # The Elm Frontend
 
-I won't dive into the Elm code. The code isn't nearly as novel as the backend Unison code. If you can get through the [Official Elm Guide](https://guide.elm-lang.org/) things should be easy to understand. After running the code you will see a the counter's value and buttons to increment and decrement it.
+I won't dive into the Elm code. The code isn't nearly as novel as the backend Unison code. If you can get through the [Official Elm Guide](https://guide.elm-lang.org/) things should be easy to understand. After running the code you will see the counter's value and buttons to increment and decrement it.
 
 
 # Conclusion
 
-Even this toy example isn't perfect, but I feel like it serves a good introduction to the possibility of using Unison as a backend language. Unison is a compelling language and the developer know what they are doing. I highly recommend giving the language a shot. Also, the compiler itself is written beautiful.
+Even this toy example isn't perfect, but I feel like it serves as a good introduction to the possibility of using Unison as a backend language. Unison is compelling, I highly recommend giving it a shot. Also, the compiler itself is written beautifully.
 
 # Dissolving the Frontend-Backend Separation?
 
-We might be able to reach for something higher than simply a Unison backend. I beleive the frontend-backend separation is an arbitrary separation and we should instead express this in a single expression. I'm not the only one who thinks this, [Hyperfiddle](https://www.hyperfiddle.net/) seems like the best relization of this idea, and [this blog post goes into the philosphy of this](https://hyperfiddle.notion.site/Reactive-Clojure-You-don-t-need-a-web-framework-you-need-a-web-language-44b5bfa526be4af282863f34fa1cfffc).
+We might be able to reach for something higher than simply a Unison backend. I believe the frontend-backend separation is arbitrary and we should instead express this in a single expression. I'm not the only one who thinks this, [Hyperfiddle](https://www.hyperfiddle.net/) seems like the best realization of this idea, and [this blog post goes into the philosophy of Hyperfiddle](https://hyperfiddle.notion.site/Reactive-Clojure-You-don-t-need-a-web-framework-you-need-a-web-language-44b5bfa526be4af282863f34fa1cfffc).
 
-I'm also have my own thing going on here in Haskell called [`handshake`](https://github.com/luketollefson/handshake) to model client-server relationships. Unfortunately, I'm unsure if you can send higher-order functions over a wire in Haskell, this is where Unison shines. We'll see where my thing goes.
+I also have my own thing going on here in Haskell called [`handshake`](https://github.com/luketollefson/handshake) to model client-server relationships. Unfortunately, I'm unsure if you can send higher-order functions over a wire in Haskell, this is where Unison shines. We'll see where my thing goes.
 
 If Unison compiled to JS we might be able to dissolve the frontend-backend separation and write everything in Unison—who knows.
 
